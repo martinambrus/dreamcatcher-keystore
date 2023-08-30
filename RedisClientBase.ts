@@ -7,45 +7,43 @@ export class RedisClientBase {
   /**
    * Redis client
    * @type { Redis }
-   * @private
+   * @protected
    */
   protected client: Redis;
 
   /**
    * Determines whether the Redis client was successfully connected.
    * @type { boolean }
-   * @private
+   * @protected
    */
   protected client_ready: boolean = false;
 
   /**
    * A logger class instance.
    * @type { ILogger }
-   * @private
+   * @protected
    */
   protected logger: ILogger;
 
   /**
+   * Redis client identification (pub / sub).
+   * Used for logging purposes.
+   *
+   * @type { string }
+   * @protected
+   */
+  protected name: string;
+
+  /**
    * Stores a logger class instance.
+   *
+   * @param { string }  name   Name of this instance ( pub / sub ) for logging purposes.
    * @param { ILogger } logger The logger class instance.
    * @constructor
    */
-  constructor( logger: ILogger ) {
+  constructor( name: string, logger: ILogger ) {
+    this.name = name;
     this.logger = logger;
-  }
-
-  /**
-   * Retrieves the class name of the passed object.
-   *
-   * @param { any } obj The object from which to derive its class name.
-   * @private
-   */
-  private getClassName(obj: any): string {
-    let
-      funcNameRegex = /function (.{1,})\(/,
-      results = (funcNameRegex).exec(obj.constructor.toString());
-
-    return (results && results.length > 1) ? results[1] : "";
   }
 
   /**
@@ -77,21 +75,10 @@ export class RedisClientBase {
       this.client = new Redis( connection_object );
     }
 
-    // detect classnames chain
-    let
-      classNames = [],
-      obj = Object.getPrototypeOf( this ),
-      className: string;
-
-    while ( (className = this.getClassName( obj )) !== "Object" ) {
-      classNames.push( className );
-      obj = Object.getPrototypeOf( obj );
-    }
-
     // add error handling for cases when we can't connect to a Redis server
     this.client.on( 'error', ( err: any ): void => {
       if ( !this.client_ready ) {
-        console.log( this.logger.format( 'Exception while trying to connect to Redis (' + JSON.stringify( classNames ) + ') via ' + url + ':' + port + "\n" + JSON.stringify( err ) ) );
+        console.log( this.logger.format( 'Exception while trying to connect to Redis (' + this.name + ') via ' + url + ':' + port + "\n" + JSON.stringify( err ) ) );
         exit( 1 );
       }
     });
@@ -99,7 +86,7 @@ export class RedisClientBase {
     // on successful ready state, mark the client as ready
     this.client.on( 'ready', (): void => {
       this.client_ready = true;
-      console.log( this.logger.format( 'Successfully connected to Redis (' + JSON.stringify( classNames ) + ') via ' + url + ( port ? ':' + port : '' ) ) );
+      console.log( this.logger.format( 'Successfully connected to Redis (' + this.name + ') via ' + url + ( port ? ':' + port : '' ) ) );
     });
   }
 }

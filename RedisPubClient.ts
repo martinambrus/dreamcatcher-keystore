@@ -1,7 +1,18 @@
 import { IRedisPub } from './Interfaces/IRedisPub.js';
 import { RedisClientBase } from './RedisClientBase.js';
+import { ILogger } from './Interfaces/ILogger.js';
 
 export class RedisPubClient extends RedisClientBase implements IRedisPub {
+
+  /**
+   * Stores a logger class instance.
+   *
+   * @param { ILogger } logger The logger class instance.
+   * @constructor
+   */
+  constructor( logger: ILogger ) {
+    super( 'Pub', logger );
+  }
 
   /**
    * A proxy for Redis->get().
