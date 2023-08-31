@@ -1,4 +1,0 @@
-[submodule "Interfaces"]
-	path = Interfaces
-	url = https://github.com/martinambrus/dreamcatcher-interfaces.git
-	branch = main
