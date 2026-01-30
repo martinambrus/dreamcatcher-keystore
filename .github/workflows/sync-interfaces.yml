@@ -45,3 +45,11 @@ jobs:
           git add Interfaces
           git commit -m "Sync Interfaces from dreamcatcher-interfaces"
           git push
+
+      - name: Dispatch downstream syncs
+        if: ${{ success() }}
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.SYNC_REPOS_TOKEN }}
+          repository: martinambrus/dreamcatcher-mq
+          event-type: sync-keystore
